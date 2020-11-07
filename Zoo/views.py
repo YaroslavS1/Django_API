@@ -77,11 +77,7 @@ class PlaceSortView(APIView):
         square = request.GET.get('square')
         temperature = request.GET.get('temperature')
         lighting = request.GET.get('lighting')
-        # print(square, temperature, lighting)
         place = Animal.objects.filter(place__name__in=Place.objects.filter(square=square, temperature=temperature, lighting=lighting).values_list('name', flat=True))
-        # Animal.objects.filter(place__name__in)
-        # print(Place.objects.filter(square=2, temperature=2, lighting=True).values_list('name', flat=True))
-        print(place)
         serializer = PlaceSortSerializer(place, many=True)
         return Response(serializer.data)
 
