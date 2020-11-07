@@ -28,3 +28,6 @@ class PlaceSerializer(serializers.Serializer):
 
 class ZookeeperSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=20)
+
+class PlaceSortSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=20)
