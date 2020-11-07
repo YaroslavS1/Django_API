@@ -3,32 +3,29 @@ from django.utils import timezone
 
 
 # Create your models here.
-
 class Animal(models.Model):
     created_at = models.DateTimeField(editable=False)
     update_at = models.DateTimeField(editable=False)
     name = models.CharField(max_length=20)
+    age = models.FloatField(default=0)
     kind_animals = models.ForeignKey('Kind_animal', related_name='Zoo', null=True, blank=True,
                                      on_delete=models.SET_NULL)
     place = models.ForeignKey('Place', related_name='Zoo', null=True, on_delete=models.SET_NULL)
 
     zookeeper = models.ForeignKey('Zookeeper', related_name='Zoo', null=True, on_delete=models.SET_NULL)
-
+    zookeeper_date_set = models.DateTimeField(default=0, editable=True, null=True, blank=True)
 
     def __str__(self):
         return self.name
 
-    # def __init__(self, *args, **kwarg):
-    #     super().__init__(self, args, **kwarg)
-    #     self.new_zookeeper = self.zookeeper
-    #
-    # def save(self, *args, **kwargs):
-    #     if self.zookeeper != self.new_zookeeper:
-    #         Zookeeper.experience = timezone.now()
-    #     return super().save(*args, **kwargs)
-
     def save(self, *args, **kwargs):
         ''' On save, update timestamps '''
+        old = type(self).objects.get(pk=self.pk) if self.pk else None
+        super(Animal, self).save(*args, **kwargs)
+        if old.zookeeper != self.zookeeper:  # Field has changed
+            self.zookeeper_date_set = timezone.now()
+        # print(str(self.zookeeper_date_set)
+
         if not self.id:
             self.created_at = timezone.now()
         self.update_at = timezone.now()
@@ -42,6 +39,7 @@ class Kind_animal(models.Model):
     character = models.CharField(max_length=50, default='')
     diet = models.CharField(max_length=100, default='')
     lifespan = models.FloatField(default=0.0)
+
     def __str__(self):
         return self.name
 
@@ -60,6 +58,9 @@ class Place(models.Model):
     square = models.FloatField(default=0.0)
     temperature = models.FloatField(default=0.0)
     lighting = models.BooleanField()
+
+    # animals = Animal._meta.get_field('place').related_model
+
     def __str__(self):
         return self.name
 
@@ -76,18 +77,17 @@ class Zookeeper(models.Model):
     update_at = models.DateTimeField(editable=False)
     name = models.CharField(max_length=20)
     age = models.IntegerField()
-    experience = models.DateTimeField(editable=False)
 
-    MANE = 'МУЖ'
+    MAN = 'МУЖ'
     FEMALE = 'ЖЕН'
     GENDER = (
-        (MANE, 'Мужчина'),
+        (MAN, 'Мужчина'),
         (FEMALE, 'Женщина'),
     )
     gender = models.CharField(max_length=3, choices=GENDER, default='')
+
     def __str__(self):
         return self.name
-
 
     def save(self, *args, **kwargs):
         ''' On save, update timestamps '''
