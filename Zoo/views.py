@@ -2,10 +2,10 @@ from rest_framework.response import Response
 from django.shortcuts import render
 from rest_framework.views import APIView
 from django.db.models import Count
+from django.utils import timezone
 
-from .models import Animal
-from .models import Place
-from .serializers import AnimalSerializer, PlaceSerializer
+from .models import Animal, Place
+from .serializers import AnimalSerializer, PlaceSerializer, ZookeeperSerializer
 
 
 # Create your views here.
@@ -51,11 +51,18 @@ class AnimalView(APIView):
 
 class PlaceView(APIView):
     def get(self, request):
-
-
         a = Place.objects.filter(
             pk__in=Animal.objects.values('place').annotate(entries=Count('place')).filter(entries__gte=2).values(
                 'place')).values('name')
         #print(list(a))
         serializer = PlaceSerializer(a, many=True)
         return Response(serializer.data)
+
+class ZookeeperView(APIView):
+    def get(self, request):
+        one_year_earlier = timezone.now() - timezone.timedelta(days=365)
+        print(one_year_earlier)
+        date = Animal.objects.filter(zookeeper_date_set__lt=one_year_earlier)
+        serializer = ZookeeperSerializer(date, many = True)
+        return Response(serializer.data)
+

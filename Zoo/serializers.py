@@ -26,5 +26,5 @@ class PlaceSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=20)
     # place_id = serializers.IntegerField()
 
-# class Zookeeper(serializers.Serializer):
-
+class ZookeeperSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=20)

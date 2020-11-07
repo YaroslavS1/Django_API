@@ -20,14 +20,13 @@ class Animal(models.Model):
 
     def save(self, *args, **kwargs):
         ''' On save, update timestamps '''
-        old = type(self).objects.get(pk=self.pk) if self.pk else None
-        super(Animal, self).save(*args, **kwargs)
-        if old.zookeeper != self.zookeeper:  # Field has changed
-            self.zookeeper_date_set = timezone.now()
-        # print(str(self.zookeeper_date_set)
-
         if not self.id:
             self.created_at = timezone.now()
+        else:
+            old = type(self).objects.get(pk=self.pk) if self.pk else None
+            super(Animal, self).save(*args, **kwargs)
+            if old.zookeeper != self.zookeeper:  # Field has changed
+                self.zookeeper_date_set = timezone.now()
         self.update_at = timezone.now()
         return super(Animal, self).save(*args, **kwargs)
 
