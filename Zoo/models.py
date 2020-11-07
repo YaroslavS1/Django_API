@@ -15,6 +15,7 @@ class Animal(models.Model):
     zookeeper = models.ForeignKey('Zookeeper', related_name='Zoo', null=True, on_delete=models.SET_NULL)
     zookeeper_date_set = models.DateTimeField(default=0, editable=True, null=True, blank=True)
 
+
     def __str__(self):
         return self.name
 
