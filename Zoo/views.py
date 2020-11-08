@@ -11,17 +11,38 @@ from .serializers import AnimalSerializer, PlaceSerializer, ZookeeperSerializer,
 # Create your views here.
 class AnimalView(APIView):
     def get(self, request):
-        animals = Animal.objects.all()
-        serializer = AnimalSerializer(animals, many=True)
+        name = request.query_params.get('name', '')
+        animals = Animal.objects.get(name=name)
+        serializer = AnimalSerializer(animals)
         return Response({"animals": serializer.data})
 
     def post(self, request):
-        animal = request.data.get('animal')
         # Create an article from the above data
-        serializer = AnimalSerializer(data=animal)
-        if serializer.is_valid(raise_exception=True):
-            animal_saved = serializer.save()
-        return Response({"success": "Animal '{}' created successfully".format(animal_saved.name)})
+        name = request.data.get('name', '')
+        age = request.data.get('age', '')
+        kind_animals_id = request.data.get('kind_animals_id', '')
+        place_id = request.data.get('place_id', '')
+        zookeeper_id = request.data.get('zookeeper_id', '')
+        animal = Animal.objects.create_user(name=name, age=age, kind_animals_id=kind_animals_id, place_id=place_id,
+                                            zookeeper_id=zookeeper_id)
+        animal.save()
+        return Response({"status": 'ok'})
+
+    def put(self, request):
+        name = request.data.get('name', '')
+        new_zookeper_id = request.data.get('old_zookeper_id', '')
+        animal = Animal.objects.get(name=name)
+        if not animal:
+            return Response({'status': 'fail'})
+        animal.zookeeper_id = new_zookeper_id
+        return Response({'ststus':'ok'})
+
+
+    def delete(self, request):
+        animal = Animal.objects.get('name')
+        name = request.qwery_params.get('name', '')
+        animal.objects.get(name=name).delete()
+        return Response({'ststus': 'ok'})
 
 
 # 1
@@ -77,7 +98,10 @@ class PlaceSortView(APIView):
         square = request.GET.get('square')
         temperature = request.GET.get('temperature')
         lighting = request.GET.get('lighting')
-        place = Animal.objects.filter(place__name__in=Place.objects.filter(square=square, temperature=temperature, lighting=lighting).values_list('name', flat=True))
+        place = Animal.objects.filter(
+            place__name__in=Place.objects.filter(square=square, temperature=temperature, lighting=lighting).values_list(
+                'name', flat=True))
         serializer = PlaceSortSerializer(place, many=True)
         return Response(serializer.data)
 
+# http://127.0.0.1:8000/api/placesort/?square=2&temperature=2&lighting=False
